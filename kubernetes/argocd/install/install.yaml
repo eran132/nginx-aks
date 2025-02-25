@@ -1,0 +1,29 @@
+# kubernetes/argocd/install/install.yaml
+# This is a customized version of ArgoCD installation manifest
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: argocd
+---
+# Include the core ArgoCD installation components by referencing the standard manifest
+# In a real deployment, you would include the full content of the ArgoCD installation here
+# For brevity, we'll use a placeholder comment referencing where to find the full manifest
+#
+# To use the full manifest in a real implementation, you would:
+# 1. Download the latest version: https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+# 2. Paste the content here
+# 3. Make any necessary customizations
+---
+# ArgoCD configuration for exposing the UI via LoadBalancer
+apiVersion: v1
+kind: Service
+metadata:
+  name: argocd-server-lb
+  namespace: argocd
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app.kubernetes.io/name: argocd-server
