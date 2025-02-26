@@ -39,6 +39,8 @@ spec:
                       description: "Nginx pod {{ $labels.pod }} has high CPU usage (> 50%) for more than 5 minutes."
   destination:
     server: https://kubernetes.default.svc
+      strategy:
+       type: Recreate
     namespace: monitoring
   syncPolicy:
     automated:
