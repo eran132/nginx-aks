@@ -1,0 +1,31 @@
+# kubernetes/monitoring/prometheus/values.yaml
+server:
+  persistentVolume:
+    enabled: true
+    size: 8Gi
+
+  global:
+    scrape_interval: 15s
+    evaluation_interval: 15s
+
+  configMapOverrideName: "prometheus-config"
+  
+  extraConfigmapMounts:
+    - name: rules-volume
+      mountPath: /etc/config/rules
+      configMap: prometheus-rules
+      readOnly: true
+
+alertmanagerFiles:
+  alertmanager.yml:
+    global:
+      resolve_timeout: 5m
+    route:
+      group_by: ['alertname', 'job']
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 3h
+      receiver: 'console'
+    receivers:
+      - name: 'console'
+        # For console output

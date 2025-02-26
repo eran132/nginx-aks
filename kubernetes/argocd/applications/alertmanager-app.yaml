@@ -1,17 +1,18 @@
-# kubernetes/argocd/applications/monitoring-app.yaml
+# kubernetes/argocd/applications/alertmanager-app.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: monitoring
+  name: alertmanager
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/eran132/nginx-aks.git
     targetRevision: HEAD
-    path: kubernetes/monitoring
-    directory:
-      recurse: true
+    path: kubernetes/monitoring/alertmanager
+    helm:
+      valueFiles:
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring

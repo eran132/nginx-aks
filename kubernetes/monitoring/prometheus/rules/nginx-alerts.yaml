@@ -1,0 +1,19 @@
+# kubernetes/monitoring/prometheus/rules/nginx-alerts.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: monitoring
+data:
+  nginx-alerts.yaml: |
+    groups:
+    - name: nginx.rules
+      rules:
+      - alert: NginxHighCpuUsage
+        expr: sum(rate(container_cpu_usage_seconds_total{pod=~"nginx-.*"}[5m])) by (pod) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High CPU usage on {{ $labels.pod }}"
+          description: "Nginx pod {{ $labels.pod }} has high CPU usage (> 50%) for more than 5 minutes."
