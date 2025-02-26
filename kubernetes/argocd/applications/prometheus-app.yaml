@@ -21,9 +21,8 @@ spec:
             alertmanagers:
               - static_configs:
                   - targets:
-                    - alertmanager.monitoring.svc.cluster.local:9093
+                    - prometheus-alertmanager.monitoring.svc.cluster.local:9093
                 scheme: http
-                path_prefix: /
                 timeout: 10s
         serverFiles:
           alerting_rules.yml:
