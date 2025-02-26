@@ -1,0 +1,29 @@
+# kubernetes/nginx/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-config
+data:
+  index.html: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <title>Welcome to Azure AKS!</title>
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          margin-top: 50px;
+          background-color: #f0f8ff;
+        }
+        h1 {
+          color: #0072C6;
+        }
+      </style>
+    </head>
+    <body>
+      <h1>Welcome to Azure AKS!</h1>
+      <p>This Nginx application is running on Azure Kubernetes Service</p>
+      <p>Deployed with ArgoCD and monitored with Prometheus & Alertmanager</p>
+    </body>
+    </html>

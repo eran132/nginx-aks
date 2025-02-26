@@ -1,18 +1,20 @@
-# kubernetes/argocd/applications/nginx-app.yaml
+# kubernetes/argocd/applications/monitoring-app.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: nginx-app
+  name: monitoring
   namespace: argocd
 spec:
   project: default
   source:
     repoURL: https://github.com/eran132/nginx-aks.git
     targetRevision: HEAD
-    path: kubernetes/nginx
+    path: kubernetes/monitoring
+    directory:
+      recurse: true
   destination:
     server: https://kubernetes.default.svc
-    namespace: default
+    namespace: monitoring
   syncPolicy:
     automated:
       prune: true
