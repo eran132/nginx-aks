@@ -1,4 +1,3 @@
-# kubernetes/argocd/applications/alertmanager-app.yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -7,12 +6,25 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/eran132/nginx-aks.git
-    targetRevision: HEAD
-    path: kubernetes/monitoring/alertmanager
+    chart: alertmanager
+    repoURL: https://prometheus-community.github.io/helm-charts
+    targetRevision: 0.19.0
     helm:
-      valueFiles:
-        - values.yaml
+      values: |
+        config:
+          global:
+            resolve_timeout: 5m
+          route:
+            group_by: ['alertname', 'job']
+            group_wait: 30s
+            group_interval: 5m
+            repeat_interval: 12h
+            receiver: 'console'
+          receivers:
+          - name: 'console'
+        persistentVolume:
+          enabled: true
+          size: 2Gi
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
