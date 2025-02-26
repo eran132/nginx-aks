@@ -80,7 +80,7 @@ Alternatively, you can use our script which automates the ArgoCD installation:
 ```powershell
 # Make sure you're connected to your AKS cluster first
 cd scripts
-.\install-argocd.ps1
+.\argocd-install.ps1
 ```
 
 ### 4. Testing ACR Integration
