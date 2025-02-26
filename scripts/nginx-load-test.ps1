@@ -35,4 +35,4 @@ function Start-LoadTest {
 }
 
 # Run the load test
-Start-LoadTest -TargetIP $nginxIP -DurationMinutes 6 -ConcurrentRequests 20
+Start-LoadTest -TargetIP $nginxIP -DurationMinutes 6 -ConcurrentRequests 2000
