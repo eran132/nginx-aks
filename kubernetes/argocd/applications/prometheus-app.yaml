@@ -22,12 +22,6 @@ spec:
               - static_configs:
                   - targets:
                     - alertmanager.monitoring.svc.cluster.local:9093
-        alertmanagerFiles:
-          alertmanager.yml:
-            global:
-              resolve_timeout: 5m
-            route:
-              receiver: 'console'
         serverFiles:
           alerting_rules.yml:
             groups:
