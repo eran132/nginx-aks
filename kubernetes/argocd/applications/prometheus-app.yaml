@@ -19,7 +19,6 @@ spec:
             type: Recreate  # Moved here under server section
           global:
             scrape_interval: 15s
-            resolve_timeout: 1m  # Shorter for testing
           alerting:
             alertmanagers:
               - static_configs:
