@@ -13,7 +13,7 @@ spec:
       values: |
         server:
           persistentVolume:
-            enabled: true
+            enabled: false
             size: 8Gi
           strategy:
             type: Recreate  # Moved here under server section
