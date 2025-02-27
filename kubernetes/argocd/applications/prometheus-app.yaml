@@ -19,11 +19,11 @@ spec:
             type: Recreate  # Moved here under server section
           global:
             scrape_interval: 15s
+            resolve_timeout: 1m  # Shorter for testing
           alerting:
             alertmanagers:
               - static_configs:
-                  - targets:
-                    - alertmanager.monitoring.svc.cluster.local:9093
+                  - targets: ['alertmanager.monitoring.svc.cluster.local:9093']
                 scheme: http
                 timeout: 10s
         serverFiles:
@@ -38,7 +38,15 @@ spec:
                       severity: warning
                     annotations:
                       summary: "High CPU usage on {{ $labels.pod }}"
-                      description: "Nginx pod {{ $labels.pod }} has high CPU usage (> 50%) for more than 5 minutes."
+                      description: "Nginx pod {{ $labels.pod }} has high CPU usage (> 50%) for more than 1 minute."
+          config:
+            route:
+              group_by: ['alertname']
+              # Add this:
+              routes:
+                - match:
+                    severity: warning
+                  receiver: 'console'
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
