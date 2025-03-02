@@ -9,6 +9,9 @@ project-root/
 ├── terraform/               # Terraform configuration
 │   ├── modules/
 │   │   └── aks/            # AKS module
+│   │       ├── main.tf
+│   │       ├── variables.tf
+│   │       └── outputs.tf
 │   ├── main.tf             # Main Terraform configuration
 │   ├── variables.tf        # Root variables
 │   ├── outputs.tf          # Root outputs
@@ -17,14 +20,27 @@ project-root/
 ├── kubernetes/             # Kubernetes manifests
 │   ├── argocd/             # ArgoCD configuration
 │   │   ├── install/
+│   │   │   └── install.yaml    # ArgoCD installation manifest
 │   │   └── applications/
-│   ├── nginx/              # Nginx application
-│   └── monitoring/         # Prometheus and Alertmanager
+│   │       ├── nginx-app.yaml       # ArgoCD app for Nginx
+│   │       ├── prometheus-app.yaml  # ArgoCD app for Prometheus (Helm)
+│   │       └── alertmanager-app.yaml # ArgoCD app for Alertmanager (Helm)
+│   │
+│   └── nginx/              # Nginx application manifests
+│       ├── deployment.yaml
+│       ├── service.yaml
+│       └── configmap.yaml
 │
 ├── scripts/                # Helper scripts
-│   ├── setup.ps1           # Setup script
-│   └── cleanup.ps1         # Cleanup script
+│   ├── setup.ps1                # Setup infrastructure
+│   ├── cleanup.ps1              # Clean up resources
+│   ├── argocd-install.ps1       # Install ArgoCD
+│   ├── test-acr-pull.ps1        # Test ACR integration
+│   ├── nginx-load-test.ps1      # Generate load on Nginx for testing alerts
+│   ├── prom2alertmanager.ps1    # Fix Prometheus-Alertmanager integration
+│   └── acr-test-deployment.yaml # Test deployment for ACR
 │
+├── .gitignore              # Git ignore file
 └── README.md               # This file
 ```
 
@@ -73,15 +89,13 @@ cd scripts
 
 ### 3. Install and Configure ArgoCD
 
-Follow the steps in the [Installation Steps](./installation-steps.md) document.
-
-Alternatively, you can use our script which automates the ArgoCD installation:
-
 ```powershell
 # Make sure you're connected to your AKS cluster first
 cd scripts
 .\argocd-install.ps1
 ```
+
+This script automates the ArgoCD installation and provides the initial admin password.
 
 ### 4. Testing ACR Integration
 
@@ -91,14 +105,40 @@ cd scripts
 .\test-acr-pull.ps1
 ```
 
-This script will verify that your AKS cluster can pull images from your private ACR using the system-managed identity. It requires Docker to be running on your local machine to build and push the test image.
+This script verifies that your AKS cluster can pull images from your private ACR using the system-managed identity. It requires Docker to be running on your local machine to build and push the test image.
+
+### 5. Deploy Applications with ArgoCD
+
+Applications are deployed automatically by ArgoCD using GitOps principles. The following applications are configured:
+
+- Nginx application: `kubernetes/argocd/applications/nginx-app.yaml`
+- Prometheus monitoring: `kubernetes/argocd/applications/prometheus-app.yaml`
+- Alertmanager: `kubernetes/argocd/applications/alertmanager-app.yaml`
+
+Simply applying these files to your cluster will start the GitOps deployment process:
+
+```powershell
+kubectl apply -f kubernetes/argocd/applications/nginx-app.yaml
+kubectl apply -f kubernetes/argocd/applications/prometheus-app.yaml
+kubectl apply -f kubernetes/argocd/applications/alertmanager-app.yaml
+```
+
+### 6. Accessing Applications
 
 - ArgoCD UI: Access via the LoadBalancer IP
 - Nginx: Access via the LoadBalancer IP
-- Prometheus: Use port forwarding or access via the LoadBalancer IP
-- Alertmanager: Use port forwarding or access via the LoadBalancer IP
+- Prometheus: Use port forwarding (`kubectl port-forward svc/prometheus-server -n monitoring 9090:80`)
+- Alertmanager: Use port forwarding (`kubectl port-forward svc/prometheus-alertmanager -n monitoring 9093:9093`)
 
-### 5. Clean Up
+### 7. Testing Alerts
+
+A script is provided to generate load on the Nginx pods to trigger the CPU usage alerts:
+
+```powershell
+.\scripts\nginx-load-test.ps1
+```
+
+### 8. Clean Up
 
 When you're done, clean up the resources to avoid incurring costs:
 
@@ -111,22 +151,26 @@ cd scripts
 
 ### Prometheus
 
-- Access the Prometheus UI to view metrics
-- Explore predefined queries for Nginx metrics
-- View active alerts
+Prometheus is deployed using the official Helm chart via ArgoCD. It's configured to:
+- Monitor the Nginx application
+- Track CPU and other resource usage
+- Set up alert rules for high CPU usage
+- Send alerts to Alertmanager
 
 ### Alertmanager
 
-- Access the Alertmanager UI to view and manage alerts
-- Configure notifications (console by default, Slack is optional)
+Alertmanager is also deployed using an official Helm chart via ArgoCD. It:
+- Receives alerts from Prometheus
+- Handles alert grouping and deduplication
+- Routes notifications to the console (with optional Slack integration)
 
 ## ArgoCD
 
 ### Accessing ArgoCD
 
-- ArgoCD UI: `http://<EXTERNAL-IP>`
+- ArgoCD UI: Access via the LoadBalancer IP
 - Default username: `admin`
-- Get the initial password: 
+- Get the initial password (provided during installation): 
   ```powershell
   kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($password))
   ```
