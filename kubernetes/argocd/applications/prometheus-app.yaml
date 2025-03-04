@@ -31,7 +31,7 @@ spec:
               - name: nginx.rules
                 rules:
                   - alert: NginxHighCpuUsage
-                    expr: sum(rate(container_cpu_usage_seconds_total{pod=~"nginx-.*"}[1m])) by (pod) > 0.00002
+                    expr: sum(rate(container_cpu_usage_seconds_total{pod=~"nginx-.*"}[1m])) by (pod) > 0.00001
                     for: 1m  # Changed from 5m to 1m
                     labels:
                       severity: warning
